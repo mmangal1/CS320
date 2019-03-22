@@ -289,9 +289,9 @@ vector<int> tournament(vector<table> tb){
 	string hist = "00000000000";
 
 	int accuracy_num = 0;
-	vector<int> gshare_table(2048, -2);
-	vector<int> bimodal_table(2048, -2);
-	vector<int> track_table(2048, 0);
+	vector<int> gshare_table(2048, -1);
+	vector<int> bimodal_table(2048, -1);
+	vector<int> track_table(2048, 2);
 	
 	for(int x = 0; x < tb.size(); x++){
 		int gshare_index = (tb.at(x).addr ^ stoi(hist, nullptr, 2)) % 2048;

@@ -12,6 +12,8 @@ std::vector<int> alwaysTaken(std::vector<table> tb);
 std::vector<int> alwaysNotTaken(std::vector<table> tb);
 std::vector<int> bimodalSingle(std::vector<table> tb, int size);
 std::vector<int> bimodalDouble(std::vector<table> tb, int size);
+std::vector<int> gshare(std::vector<table> tb, int hist_size);
+std::vector<int> tournament(std::vector<table> tb);
 void outputResult(std::vector<std::vector<std::vector<int>>> res_vec, std::string outputfile);
 
 #endif

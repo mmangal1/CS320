@@ -65,11 +65,22 @@ int main(int argc, char *argv[]){
 		resBimodalDouble.push_back(bimodalDouble(tableTraceTwoBit, size_table[x]));
 	}
 
+	vector<vector<int>> resGshare;
+	for(int x = 3; x < 12; x++){
+		resGshare.push_back(gshare(tableTraceTwoBit, x));
+	}
+
+	vector<vector<int>> resTournament;
+
+	resTournament.push_back(tournament(tableTraceTwoBit));
+
 	vector<vector<vector<int>>> res_vec;
 	res_vec.push_back(resAlwaysTaken);
 	res_vec.push_back(resAlwaysNotTaken);
 	res_vec.push_back(resBimodalSingle);
 	res_vec.push_back(resBimodalDouble);
+	res_vec.push_back(resGshare);
+	res_vec.push_back(resTournament);
 
 	string outputFile = argv[2];
 	ofstream fp(outputFile);
@@ -214,11 +225,184 @@ vector<int> bimodalDouble(vector<table> tb, int size){
 	
 }
 
+vector<int> gshare(vector<table> tb, int hist_size){
+	string hist;
+	for(int x = 0; x < hist_size; x++){
+		hist.append("0");
+	}
 
+	int accuracy_num = 0;
+	vector<int> track_table(2048, -1);
+	
+	for(auto iter = tb.begin(); iter < tb.end(); iter += 1){
+		int table_index = (iter->addr ^ stoi(hist, nullptr, 2)) % 2048;
+		bool prediction;
+		bool actual;
+		if(iter->taken == 1){
+			actual = true;
+		}else{
+			actual = false;
+		}
+		if(track_table[table_index] > 0){
+			if(actual)
+				prediction = true;
+			else
+				prediction = false;
+			
+		}else{
+			if(!actual)
+				prediction = true;
+			else
+				prediction = false;
+		}
+				
+		if(prediction){
+			accuracy_num++;
+			if(track_table[table_index] == 1){
+				track_table[table_index] = 2;
+			}else if(track_table[table_index] == -1){
+				track_table[table_index] = -2;
+			}
+		}else{
+			if(track_table[table_index] == 1 || track_table[table_index] == -2){
+				track_table[table_index] = -1;
+			}else{
+				track_table[table_index] = 1;
+			}
+		}
 
+		if(actual){
+			hist = hist.substr(1, hist.size()).append("1");
+		}else{
+			hist = hist.substr(1, hist.size()).append("0");
+		}
+	}
+	
+	vector<int> res;
+	res.push_back(accuracy_num);
+	res.push_back(tb.size());
+	return res;
+	
+}
 
+vector<int> tournament(vector<table> tb){
+	string hist = "00000000000";
 
+	int accuracy_num = 0;
+	vector<int> gshare_table(2048, -2);
+	vector<int> bimodal_table(2048, -2);
+	vector<int> track_table(2048, 0);
+	
+	for(int x = 0; x < tb.size(); x++){
+		int gshare_index = (tb.at(x).addr ^ stoi(hist, nullptr, 2)) % 2048;
+		int index = tb.at(x).addr % 2048;
+		bool g_prediction;
+		bool b_prediction;
+		bool actual;
+		if(tb.at(x).taken == 1){
+			actual = true;
+		}else{
+			actual = false;
+		}
+		if(gshare_table[gshare_index] > 0){
+			if(actual)
+				g_prediction = true;
+			else
+				g_prediction = false;
+			
+		}else{
+			if(!actual)
+				g_prediction = true;
+			else
+				g_prediction = false;
+		}
+		
+		if(bimodal_table[index] > 0){
+			if(actual)
+				b_prediction = true;
+			else
+				b_prediction = false;
+			
+		}else{
+			if(!actual)
+				b_prediction = true;
+			else
+				b_prediction = false;
+		}
+				
+		if(track_table[index] < 2){
+			if(g_prediction){
+				accuracy_num++;
+				if(!b_prediction){
+					if(track_table[index] > 0){
+						track_table[index]--;
+					}
+				}
+			}else{
+				if(b_prediction){
+					if(track_table[index] < 3){
+						track_table[index]++;
+					}
+				}
+			}
+		}else{
+			if(b_prediction){
+				accuracy_num++;
+				if(!g_prediction){
+					if(track_table[index] < 3){
+						track_table[index]++;
+					}
+				}
+			}else{
+				if(g_prediction){
+					if(track_table[index] > 0){
+						track_table[index]--;
+					}
+				}
+			}
+			
+		}
 
+		if(g_prediction){
+			if(gshare_table[gshare_index] == 1){
+				gshare_table[gshare_index] = 2;
+			}else if(gshare_table[gshare_index] == -1){
+				gshare_table[gshare_index] = -2;
+			}
+		}else{
+			if(gshare_table[gshare_index] == 1 || gshare_table[gshare_index] == -2){
+				gshare_table[gshare_index] = -1;
+			}else{
+				gshare_table[gshare_index] = 1;
+			}
+		}
+		if(b_prediction){
+			if(bimodal_table[index] == 1){
+				bimodal_table[index] = 2;
+			}else if(bimodal_table[index] == -1){
+				bimodal_table[index] = -2;
+			}
+		}else{
+			if(bimodal_table[index] == 1 || bimodal_table[index] == -2){
+				bimodal_table[index] = -1;
+			}else{
+				bimodal_table[index] = 1;
+			}
+		}
+
+		if(actual){
+			hist = hist.substr(1, hist.size()).append("1");
+		}else{
+			hist = hist.substr(1, hist.size()).append("0");
+		}
+	}
+	
+	vector<int> res;
+	res.push_back(accuracy_num);
+	res.push_back(tb.size());
+	return res;
+	
+}
 
 
 
